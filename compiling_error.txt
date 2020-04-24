@@ -1,0 +1,14 @@
+/tmp/ccZ9iuH8.o: In function `main':
+test.c:(.text+0xba): undefined reference to `ply_create_poly'
+test.c:(.text+0xcb): undefined reference to `ply_create_poly'
+test.c:(.text+0x111): undefined reference to `ply_set_coef'
+test.c:(.text+0x160): undefined reference to `ply_set_coef'
+test.c:(.text+0x17f): undefined reference to `ply_print_poly'
+test.c:(.text+0x18e): undefined reference to `ply_print_poly'
+test.c:(.text+0x1a7): undefined reference to `ply_sum'
+test.c:(.text+0x1bd): undefined reference to `ply_print_poly'
+test.c:(.text+0x1d6): undefined reference to `ply_product'
+test.c:(.text+0x1e6): undefined reference to `ply_print_poly'
+test.c:(.text+0x1fc): undefined reference to `ply_legendre'
+test.c:(.text+0x21d): undefined reference to `ply_print_poly'
+collect2: error: ld returned 1 exit status
