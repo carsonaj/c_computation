@@ -1,7 +1,7 @@
 all: test
 
 test: polynomial.o counting.o
-	gcc -Werror test.c -o test polynomial.o counting.o
+	gcc -Werror test.c -o test polynomial.o counting.o -g -std=c99
 
 polynomial.o: polynomial.c
 	gcc -c polynomial.c

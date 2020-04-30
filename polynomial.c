@@ -339,7 +339,7 @@ Polynomial **ply_gcd(Polynomial *f, Polynomial *g) {
         Polynomial *prod = ply_product(q, b[0]);
         Polynomial *scaled = ply_scale(-1.0, prod);
         //PROBLEM, see ply_sum
-*        c[0] = ply_sum(a[0], scaled); //PROBLEM
+        c[0] = ply_sum(a[0], scaled); //PROBLEM
         ply_delete_poly(prod);
         ply_delete_poly(scaled);
 
