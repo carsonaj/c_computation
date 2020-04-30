@@ -1,6 +1,4 @@
 #include <stdlib.h>
-#include <stdbool.h>
-#include "array.h"
 
 // helpful functions
 static int min(double a, double b) {

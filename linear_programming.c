@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
 #include "array.h"
 #include "matrix.h"
@@ -264,7 +263,7 @@ Matrix *lp_simplex_method(Matrix *c, Matrix *A, Matrix *b) {
         Matrix *xb = mat_solve_system(B, b);
         int val = alg(B, N, cb_trans, cn_trans, xb, indices);
         assert(val==1);
-        Matrix *x = mat_zeros(n, 1);
+        Matrix *x = mat_zero(n, 1);
         int i;
         for (i=0; i<m; i++) {
             double element = mat_get_element(xb, i, 0);

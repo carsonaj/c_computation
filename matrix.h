@@ -1,8 +1,8 @@
 // matrix
 
-typedef struct Matrix_ Matrix;
+typedef struct Matrix Matrix;
 
-struct Matrix_ {
+struct Matrix {
     int rows;
     int cols;
     double *data;
@@ -11,7 +11,7 @@ struct Matrix_ {
 // structure
 Matrix *mat_create_matrix(int rows, int cols);
 void mat_delete_matrix(Matrix *mat);
-Matrix *mat_zeros(int rows, int cols);
+Matrix *mat_zero(int rows, int cols);
 double mat_get_element(Matrix *mat, int row, int col);
 void mat_set_element(Matrix *mat, int row, int col, double element);
 Matrix *mat_get_rows(Matrix *mat, int rows, int *rows_arr);
@@ -24,7 +24,7 @@ Matrix *mat_copy_matrix(Matrix *mat);
 void mat_row_op1(Matrix *mat, int i, int j);
 void mat_row_op2(Matrix *mat, int i, double k);
 void mat_row_op3(Matrix *mat, int i, int j, double k);
-bool mat_equal(Matrix *A, Matrix *B);
+int mat_equal(Matrix *A, Matrix *B);
 Matrix *mat_product(Matrix *A, Matrix *B);
 Matrix *mat_had_product(Matrix *A, Matrix *B);
 Matrix *mat_scalar_poduct(double c, Matrix *mat);

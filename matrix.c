@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
 #include "array.h"
 #include "matrix.h"
+
+#define TRUE 1
+#define FALSE 0
+
 
 // zero indexed matrix library
 
@@ -25,7 +28,7 @@ void mat_delete_matrix(Matrix *mat) {
     free(mat);
 }
 
-Matrix *mat_zeros(int rows, int cols) {
+Matrix *mat_zero(int rows, int cols) {
     Matrix *mat = mat_create_matrix(rows, cols);
     int i;
     for (i=0; i<rows*cols; i++) {
@@ -189,11 +192,11 @@ void mat_row_op3(Matrix *mat, int i, int j, double k) {
     }
 }
 
-bool mat_equal(Matrix *A, Matrix *B) {
-    bool same_rows = (A->rows == B->rows);
-    bool same_cols = (A->cols == B->cols);
+int mat_equal(Matrix *A, Matrix *B) {
+    int same_rows = (A->rows == B->rows);
+    int same_cols = (A->cols == B->cols);
     if (!same_rows || !same_cols) {
-        return false;
+        return FALSE;
     }
 
     int rows = A->rows;
@@ -201,10 +204,10 @@ bool mat_equal(Matrix *A, Matrix *B) {
     int i;
     for (i=0; i<rows*cols; i=i+1) {
         if (A->data[i] != B->data[i])
-            return false;
+            return FALSE;
     }
 
-    return true;
+    return FALSE;
 }
 
 // standard matrix product
@@ -314,7 +317,7 @@ static void sub_ref(Matrix *mat, int start_row, int start_col) {
     // check if mat is zero matrix
     int rows = mat->rows;
     int cols = mat->cols;
-    bool val = true;
+    int val = TRUE;
     double element;
     int row = start_row;
     int col = start_col;
@@ -323,7 +326,7 @@ static void sub_ref(Matrix *mat, int start_row, int start_col) {
         while (row<rows) {
             element = mat_get_element(mat, row, col);
             if (element != 0) {
-                val = false;
+                val = FALSE;
                 break;
             }
             row = row+1;
@@ -336,7 +339,7 @@ static void sub_ref(Matrix *mat, int start_row, int start_col) {
         return;
 
     // (row, col) is now pivot;
-    // row operations to creat a pivot of 1 and zeros below pivot
+    // row operations to create a pivot of 1 and zeros below pivot
     mat_row_op2(mat, row, 1.0/element);
     mat_row_op1(mat, start_row, row);
 
@@ -360,7 +363,7 @@ static void sub_rref(Matrix *mat, int start_row, int start_col) {
     // check if mat is zero matrix
     int rows = mat->rows;
     int cols = mat->cols;
-    bool val = true;
+    int val = TRUE;
     double element;
     int row = start_row;
     int col = start_col;
@@ -369,7 +372,7 @@ static void sub_rref(Matrix *mat, int start_row, int start_col) {
         while (row<rows) {
             element = mat_get_element(mat, row, col);
             if (element != 0) {
-                val = false;
+                val = FALSE;
                 break;
             }
             row = row+1;
