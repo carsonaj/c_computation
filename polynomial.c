@@ -35,7 +35,7 @@ Polynomial *ply_create_poly(int deg) {
     Polynomial *poly = malloc(sizeof(Polynomial));
     poly->deg = deg;
     //PROBLEM corrupted heap
-*    double *coef = malloc((deg+1)*sizeof(double)); //PROBLEM
+    double *coef = malloc((deg+1)*sizeof(double)); //PROBLEM
     poly->coefs = coef;
 
     return poly;
@@ -157,7 +157,7 @@ Polynomial *ply_sum(Polynomial *poly1, Polynomial *poly2) {
     }
 
     //PROBLEM, see ply_create_poly
-*    Polynomial *sum_poly = ply_create_poly(deg);//PROBLEM
+    Polynomial *sum_poly = ply_create_poly(deg);//PROBLEM
     for (i=0; i<=deg; i++) {
         double coef = sum_coefs[i];
         ply_set_coef(sum_poly, i, coef);

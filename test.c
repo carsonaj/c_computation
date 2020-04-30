@@ -28,8 +28,8 @@ int main() {
     g->coefs[1] = -5;
     g->coefs[2] = 1;
 
-
-    Polynomial **res = ply_gcd(f,g);
+    //PROBLEM see ply_gcd
+    Polynomial **res = ply_gcd(f,g); //PROBLEM
 
     printf("gcd is \n");
     ply_print_poly(res[0]);
