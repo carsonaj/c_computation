@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "array.h"
+#include "polynomial.c"
 #include "matrix.h"
 
 #define TRUE 1
@@ -11,44 +12,44 @@
 // zero indexed matrix library
 
 
+//Matrix
 // data structure
-Matrix *mat_create_matrix(int rows, int cols) {
-    Matrix *mat = malloc(sizeof(Matrix));
-    mat->rows = rows;
-    mat->cols = cols;
+Matrix mat_create(int rows, int cols) {
+    Matrix mat;
+    mat.rows = rows;
+    mat.cols = cols;
 
     int length = rows*cols;
-    mat->data = malloc(length*sizeof(double));
+    mat.data = malloc(length*sizeof(double));
 
     return mat;
 }
 
-void mat_delete_matrix(Matrix *mat) {
-    free(mat->data);
-    free(mat);
+void mat_delete(Matrix mat) {
+    free(mat.data);
 }
 
-Matrix *mat_zero(int rows, int cols) {
-    Matrix *mat = mat_create_matrix(rows, cols);
+Matrix mat_zero(int rows, int cols) {
+    Matrix mat = mat_create(rows, cols);
     int i;
     for (i=0; i<rows*cols; i++) {
-        mat->data[i] = 0.0;
+        mat.data[i] = 0.0;
     }
 
     return mat;
 }
 
-double mat_get_element(Matrix *mat, int row, int col) {
-    return mat->data[row*(mat->cols) + col];
+double mat_get_element(Matrix mat, int row, int col) {
+    return mat.data[row*(mat.cols) + col];
 }
 
-void mat_set_element(Matrix *mat, int row, int col, double element) {
-    mat->data[row*(mat->cols) + col] = element;
+void mat_set_element(Matrix mat, int row, int col, double element) {
+    mat.data[row*(mat.cols) + col] = element;
 }
 
-Matrix *mat_get_rows(Matrix *mat, int rows, int *rows_arr) {
-    int cols = mat->cols;
-    Matrix *row_mat = mat_create_matrix(rows, cols);
+Matrix mat_get_rows(Matrix mat, int rows, int *rows_arr) {
+    int cols = mat.cols;
+    Matrix row_mat = mat_create(rows, cols);
 
     int i, j;
     for (i=0; i<rows; i++) {
@@ -61,9 +62,9 @@ Matrix *mat_get_rows(Matrix *mat, int rows, int *rows_arr) {
     return row_mat;
 }
 
-Matrix *mat_get_cols(Matrix *mat, int cols, int *cols_arr) {
-    int rows = mat->rows;
-    Matrix *col_mat = mat_create_matrix(rows, cols);
+Matrix mat_get_cols(Matrix mat, int cols, int *cols_arr) {
+    int rows = mat.rows;
+    Matrix col_mat = mat_create(rows, cols);
 
     int i, j;
     for (j=0; j<cols; j++) {
@@ -76,18 +77,18 @@ Matrix *mat_get_cols(Matrix *mat, int cols, int *cols_arr) {
     return col_mat;
 }
 
-Matrix *mat_join(Matrix *A, Matrix *B, int axis) {
+Matrix mat_join(Matrix A, Matrix B, int axis) {
     // axis = 0 means vertical join
     // axis = 1 means horizontal join
-    int m = A->rows;
-    int n = A->cols;
-    int r = B->rows;
-    int s = B->cols;
+    int m = A.rows;
+    int n = A.cols;
+    int r = B.rows;
+    int s = B.cols;
 
-    Matrix *join;
+    Matrix join;
     if (axis==0) {
         assert(n==s);
-        join = mat_create_matrix(m+r, n);
+        join = mat_create(m+r, n);
         int i, j;
         for (j=0; j<n; j++) {
             for (i=0; i<m; i++) {
@@ -104,7 +105,7 @@ Matrix *mat_join(Matrix *A, Matrix *B, int axis) {
 
     else if (axis==1) {
         assert(m==r);
-        join = mat_create_matrix(m, n+s);
+        join = mat_create(m, n+s);
         int i, j;
         for (i=0; i<m; i++) {
             for (j=0; j<n; j++) {
@@ -122,9 +123,9 @@ Matrix *mat_join(Matrix *A, Matrix *B, int axis) {
     return join;
 }
 
-void mat_print_matrix(Matrix *mat) {
-    int rows = mat->rows;
-    int cols = mat->cols;
+void mat_print(Matrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
     int i, j;
     for (i=0; i<rows; i++) {
         for (j=0; j<cols; j++) {
@@ -136,10 +137,10 @@ void mat_print_matrix(Matrix *mat) {
 }
 
 // create a copy of a matrix in different memory
-Matrix *mat_copy_matrix(Matrix *mat) {
-    int rows = mat->rows;
-    int cols = mat->cols;
-    Matrix *cpy = mat_create_matrix(rows, cols);
+Matrix mat_copy(Matrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
+    Matrix cpy = mat_create(rows, cols);
     int i, j;
     for (i=0; i<rows; i++) {
         for (j=0; j<cols; j++) {
@@ -157,10 +158,10 @@ Matrix *mat_copy_matrix(Matrix *mat) {
 // elementary row operations:
 
 // (type 1) swaps rows i,j
-void mat_row_op1(Matrix *mat, int i, int j) {
-    int cols = mat->cols;
+void mat_row_op1(Matrix mat, int i, int j) {
+    int cols = mat.cols;
     int rows_arr[1] = {i};
-    Matrix *temp_i = mat_get_rows(mat, 1, rows_arr);
+    Matrix temp_i = mat_get_rows(mat, 1, rows_arr);
     int col;
     for (col=0; col<cols; col=col+1) {
         double element_j = mat_get_element(mat, j, col);
@@ -169,12 +170,12 @@ void mat_row_op1(Matrix *mat, int i, int j) {
         mat_set_element(mat, j, col, element_i);
     }
 
-    mat_delete_matrix(temp_i);
+    mat_delete(temp_i);
 }
 
 // (type 2) multiplies row i by a constant k
-void mat_row_op2(Matrix *mat, int i, double k) {
-    int cols = mat->cols;
+void mat_row_op2(Matrix mat, int i, double k) {
+    int cols = mat.cols;
     int j;
     for (j=0; j<cols; j=j+1) {
         double element = k*mat_get_element(mat, i, j);
@@ -183,8 +184,8 @@ void mat_row_op2(Matrix *mat, int i, double k) {
 }
 
 // (type 3) multiplies row j by constant k and adds it to row i
-void mat_row_op3(Matrix *mat, int i, int j, double k) {
-    int cols = mat->cols;
+void mat_row_op3(Matrix mat, int i, int j, double k) {
+    int cols = mat.cols;
     int col;
     for (col=0; col<cols; col=col+1) {
         double element = mat_get_element(mat, i, col) + k*mat_get_element(mat, j, col);
@@ -192,33 +193,33 @@ void mat_row_op3(Matrix *mat, int i, int j, double k) {
     }
 }
 
-int mat_equal(Matrix *A, Matrix *B) {
-    int same_rows = (A->rows == B->rows);
-    int same_cols = (A->cols == B->cols);
+int mat_equal(Matrix A, Matrix B) {
+    int same_rows = (A.rows == B.rows);
+    int same_cols = (A.cols == B.cols);
     if (!same_rows || !same_cols) {
         return FALSE;
     }
 
-    int rows = A->rows;
-    int cols = A->cols;
+    int rows = A.rows;
+    int cols = A.cols;
     int i;
     for (i=0; i<rows*cols; i=i+1) {
-        if (A->data[i] != B->data[i])
+        if (A.data[i] != B.data[i])
             return FALSE;
     }
 
-    return FALSE;
+    return TRUE;
 }
 
 // standard matrix product
-Matrix *mat_product(Matrix *A, Matrix *B) {
-    assert(A->cols == B->rows);
+Matrix mat_product(Matrix A, Matrix B) {
+    assert(A.cols == B.rows);
     int m,n,p;
-    m = A->rows;
-    n = A->cols;
-    p = B->cols;
+    m = A.rows;
+    n = A.cols;
+    p = B.cols;
 
-    Matrix *mat = mat_create_matrix(m, p);
+    Matrix mat = mat_create(m, p);
     int i,j;
     for (i=0; i<m; i=i+1) {
         for (j=0; j<p; j=j+1) {
@@ -238,14 +239,14 @@ Matrix *mat_product(Matrix *A, Matrix *B) {
 }
 
 // Hadamard product
-Matrix *mat_had_product(Matrix *A, Matrix *B) {
-    assert(A->rows == B->rows);
-    assert(A->cols == B->cols);
+Matrix mat_had_product(Matrix A, Matrix B) {
+    assert(A.rows == B.rows);
+    assert(A.cols == B.cols);
 
-    int rows = A->rows;
-    int cols = A->cols;
+    int rows = A.rows;
+    int cols = A.cols;
 
-    Matrix *prod = mat_create_matrix(rows, cols);
+    Matrix prod = mat_create(rows, cols);
     int i, j;
     for (i=0; i<rows; i++) {
         for (j=0; j<cols; j++) {
@@ -257,10 +258,10 @@ Matrix *mat_had_product(Matrix *A, Matrix *B) {
     return prod;
 }
 
-Matrix *mat_scalar_poduct(double c, Matrix *mat) {
-    int rows = mat->rows;
-    int cols = mat->cols;
-    Matrix *prod = mat_create_matrix(rows, cols);
+Matrix mat_scalar_poduct(double c, Matrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
+    Matrix prod = mat_create(rows, cols);
 
     int i, j;
     for (i=0; i<rows; i++) {
@@ -273,13 +274,13 @@ Matrix *mat_scalar_poduct(double c, Matrix *mat) {
     return prod;
 }
 
-Matrix *mat_sum(Matrix *A, Matrix *B) {
-    assert(A->rows == B->rows);
-    assert(A->cols == B->cols);
-    int m = A->rows;
-    int n = A->cols;
+Matrix mat_sum(Matrix A, Matrix B) {
+    assert(A.rows == B.rows);
+    assert(A.cols == B.cols);
+    int m = A.rows;
+    int n = A.cols;
 
-    Matrix *mat = mat_create_matrix(m, n);
+    Matrix mat = mat_create(m, n);
     int i,j;
     for (i=0; i<m; i=i+1) {
         for (j=0; j<n; j=j+1) {
@@ -291,11 +292,11 @@ Matrix *mat_sum(Matrix *A, Matrix *B) {
     return mat;
 }
 
-Matrix *mat_transpose(Matrix *mat) {
-    int rows = mat->rows;
-    int cols = mat->cols;
+Matrix mat_transpose(Matrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
 
-    Matrix *trans = mat_create_matrix(cols, rows);
+    Matrix trans = mat_create(cols, rows);
     int i, j;
     for (i=0; i<rows; i++) {
         for (j=0; j<cols; j++) {
@@ -312,11 +313,11 @@ Matrix *mat_transpose(Matrix *mat) {
 // algorithms
 
 // row echelon form
-static void sub_ref(Matrix *mat, int start_row, int start_col) {
+static void sub_ref(Matrix mat, int start_row, int start_col) {
 
     // check if mat is zero matrix
-    int rows = mat->rows;
-    int cols = mat->cols;
+    int rows = mat.rows;
+    int cols = mat.cols;
     int val = TRUE;
     double element;
     int row = start_row;
@@ -353,16 +354,16 @@ static void sub_ref(Matrix *mat, int start_row, int start_col) {
     sub_ref(mat, start_row+1, col+1);
 }
 
-void mat_ref(Matrix *mat) {
+void mat_ref(Matrix mat) {
     sub_ref(mat, 0, 0);
 }
 
 // reduced row echelon form
-static void sub_rref(Matrix *mat, int start_row, int start_col) {
+static void sub_rref(Matrix mat, int start_row, int start_col) {
     // assume matrix is in row echelon form
     // check if mat is zero matrix
-    int rows = mat->rows;
-    int cols = mat->cols;
+    int rows = mat.rows;
+    int cols = mat.cols;
     int val = TRUE;
     double element;
     int row = start_row;
@@ -398,24 +399,297 @@ static void sub_rref(Matrix *mat, int start_row, int start_col) {
     sub_rref(mat, row, col);
 }
 
-void mat_rref(Matrix *mat) {
+void mat_rref(Matrix mat) {
     mat_ref(mat);
     sub_rref(mat, 0, 0);
 }
 
 // solve system Ax=b
-Matrix *mat_solve_system(Matrix *A, Matrix *b) {
-    int m = A->rows;
-    int n = A->cols;
-    int l = b->rows;
+Matrix mat_solve_system(Matrix A, Matrix b) {
+    int m = A.rows;
+    int n = A.cols;
+    int l = b.rows;
     assert(m==n);
     assert(m==l);
 
-    Matrix *xsol = mat_join(A, b, 1);
+    Matrix xsol = mat_join(A, b, 1);
     mat_rref(xsol);
     int cols_arr[1] = {m};
-    Matrix *x = mat_get_cols(xsol, 1, cols_arr);
-    mat_delete_matrix(xsol);
+    Matrix x = mat_get_cols(xsol, 1, cols_arr);
+    mat_delete(xsol);
 
     return x;
+}
+
+//-------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//PolyMatrix
+PolyMatrix pymat_create(int rows, int cols) {
+    PolyMatrix mat;
+    mat.rows = rows;
+    mat.cols = cols;
+
+    int length = rows*cols;
+    mat.data = malloc(length*sizeof(Polynomial));
+
+    return mat;
+}
+
+// users responsibility to delete all polynomials within polymatrix
+void pymat_delete(PolyMatrix mat) {
+    free(mat.data);
+}
+
+PolyMatrix pymat_zero(int rows, int cols) {
+    PolyMatrix mat = pymat_create(rows, cols);
+    int i;
+    for (i=0; i<rows*cols; i++) {
+        mat.data[i] = ply_zero();
+    }
+
+    return mat;
+}
+
+Polynomial pymat_get_element(PolyMatrix mat, int row, int col) {
+    return mat.data[row*(mat.cols) + col];
+}
+
+void pymat_set_element(PolyMatrix mat, int row, int col, Polynomial element) {
+    mat.data[row*(mat.cols) + col] = element;
+}
+
+PolyMatrix pymat_get_rows(PolyMatrix mat, int rows, int *rows_arr) {
+    int cols = mat.cols;
+    PolyMatrix row_mat = pymat_create(rows, cols);
+
+    int i, j;
+    for (i=0; i<rows; i++) {
+        for (j=0; j<cols; j++) {
+            Polynomial element = pymat_get_element(mat, rows_arr[i], j);
+            pymat_set_element(row_mat, i, j, element);
+        }
+    }
+
+    return row_mat;
+}
+
+PolyMatrix pymat_get_cols(PolyMatrix mat, int cols, int *cols_arr) {
+    int rows = mat.rows;
+    PolyMatrix col_mat = pymat_create(rows, cols);
+
+    int i, j;
+    for (j=0; j<cols; j++) {
+        for (i=0; i<rows; i++) {
+            Polynomial element = pymat_get_element(mat, i, cols_arr[j]);
+            pymat_set_element(col_mat, i, j, element);
+        }
+    }
+
+    return col_mat;
+}
+
+PolyMatrix pymat_join(PolyMatrix A, PolyMatrix B, int axis) {
+    // axis = 0 means vertical join
+    // axis = 1 means horizontal join
+    int m = A.rows;
+    int n = A.cols;
+    int r = B.rows;
+    int s = B.cols;
+
+    PolyMatrix join;
+    if (axis==0) {
+        assert(n==s);
+        join = pymat_create(m+r, n);
+        int i, j;
+        for (j=0; j<n; j++) {
+            for (i=0; i<m; i++) {
+                Polynomial elementA = pymat_get_element(A, i, j);
+                pymat_set_element(join, i, j, elementA);
+            }
+
+            for (i=0; i<r; i++) {
+                Polynomial elementB = pymat_get_element(B, i, j);
+                pymat_set_element(join, i+m, j, elementB);
+            }
+        }
+    }
+
+    else if (axis==1) {
+        assert(m==r);
+        join = pymat_create(m, n+s);
+        int i, j;
+        for (i=0; i<m; i++) {
+            for (j=0; j<n; j++) {
+                Polynomial elementA = pymat_get_element(A, i, j);
+                pymat_set_element(join, i, j, elementA);
+            }
+
+            for (j=0; j<s; j++) {
+                Polynomial elementB = pymat_get_element(B, i, j);
+                pymat_set_element(join, i, j+n, elementB);
+            }
+        }
+    }
+
+    return join;
+}
+
+PolyMatrix pymat_copy(PolyMatrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
+    PolyMatrix cpy = pymat_create(rows, cols);
+    int i, j;
+    for (i=0; i<rows; i++) {
+        for (j=0; j<cols; j++) {
+            Polynomial element = pymat_get_element(mat, i, j);
+            pymat_set_element(cpy, i, j, element);
+        }
+    }
+
+    return cpy;
+}
+
+int pymat_equal(PolyMatrix A, PolyMatrix B) {
+    int same_rows = (A.rows == B.rows);
+    int same_cols = (A.cols == B.cols);
+    if (!same_rows || !same_cols) {
+        return FALSE;
+    }
+
+    int rows = A.rows;
+    int cols = A.cols;
+    int i;
+    for (i=0; i<rows*cols; i=i+1) {
+        if (ply_equal(A.data[i], B.data[i])) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+// standard matrix product
+PolyMatrix pymat_product(PolyMatrix A, PolyMatrix B) {
+    assert(A.cols == B.rows);
+    int m,n,p;
+    m = A.rows;
+    n = A.cols;
+    p = B.cols;
+
+    PolyMatrix mat = pymat_create(m, p);
+    int i,j;
+    for (i=0; i<m; i=i+1) {
+        for (j=0; j<p; j=j+1) {
+
+            Polynomial kron_prod[n];
+            int k;
+            for (k=0; k<n; k=k+1) {
+                Polynomial Aik = pymat_get_element(A, i, k);
+                Polynomial Bkj = pymat_get_element(B, k, j);
+                kron_prod[k] = ply_product(Aik, Bkj);
+            }
+
+            Polynomial sum[n-1];
+            sum[0] = ply_copy(kron_prod[0]);
+            int l;
+            for (l=1; l<n-1;l++) {
+                sum[i] = ply_sum(kron_prod[i-1], kron_prod[i]);
+            }
+
+            for (k=0; k<n; k++) {
+                ply_delete(kron_prod[k]);
+            }
+
+            for (l=0; l<n-2; l++){
+                ply_delete(sum[l]);
+            }
+
+            Polynomial element = sum[n-2];
+            pymat_set_element(mat, i, j, element);
+        }
+    }
+
+    return mat;
+}
+
+// Hadamard product
+PolyMatrix pymat_had_product(PolyMatrix A, PolyMatrix B) {
+    assert(A.rows == B.rows);
+    assert(A.cols == B.cols);
+
+    int rows = A.rows;
+    int cols = A.cols;
+
+    PolyMatrix prod = pymat_create(rows, cols);
+    int i, j;
+    for (i=0; i<rows; i++) {
+        for (j=0; j<cols; j++) {
+            Polynomial Aij = pymat_get_element(A, i, j);
+            Polynomial Bij = pymat_get_element(B, i, j);
+            Polynomial element = ply_product(Aij, Bij);
+            pymat_set_element(prod, i, j, element);
+        }
+    }
+
+    return prod;
+}
+
+PolyMatrix pymat_scalar_poduct(double c, PolyMatrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
+    PolyMatrix prod = pymat_create(rows, cols);
+
+    int i, j;
+    for (i=0; i<rows; i++) {
+        for (j=0; j<cols; j++) {
+            Polynomial element = ply_scale(c, pymat_get_element(mat, i, j));
+            pymat_set_element(prod, i, j, element);
+        }
+    }
+
+    return prod;
+}
+
+PolyMatrix pymat_sum(PolyMatrix A, PolyMatrix B) {
+    assert(A.rows == B.rows);
+    assert(A.cols == B.cols);
+    int m = A.rows;
+    int n = A.cols;
+
+    PolyMatrix mat = pymat_create(m, n);
+    int i,j;
+    for (i=0; i<m; i=i+1) {
+        for (j=0; j<n; j=j+1) {
+            Polynomial Aij = pymat_get_element(A, i, j);
+            Polynomial Bij = pymat_get_element(B, i, j);
+            Polynomial element = ply_sum(Aij, Bij);
+            pymat_set_element(mat, i, j, element);
+        }
+    }
+
+    return mat;
+}
+
+PolyMatrix pymat_transpose(PolyMatrix mat) {
+    int rows = mat.rows;
+    int cols = mat.cols;
+
+    PolyMatrix trans = pymat_create(cols, rows);
+    int i, j;
+    for (i=0; i<rows; i++) {
+        for (j=0; j<cols; j++) {
+            Polynomial element = pymat_get_element(mat, i, j);
+            pymat_set_element(trans, j, i, element);
+        }
+    }
+
+    return trans;
 }
