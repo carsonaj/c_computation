@@ -9,32 +9,50 @@
 
 
 int main() {
+
+
+    Polynomial f = ply_create(3);
+    f.coefs[0] =-8.0;
+    f.coefs[1] =0.0;
+    f.coefs[2] =0.0;
+    f.coefs[3] =1.0;
+
+    //Polynomial f = ply_zero();
+
+    Polynomial g = ply_create(1);
+    g.coefs[0] = -2.0;
+    g.coefs[1] = 1.0;
+
+    //PolyMatrix pair = ply_division(f,g);
+    //ply_print(pymat_get_element(pair,0,0));
+    //ply_print(pymat_get_element(pair,0,1));
 /*
-    Polynomial *z = ply_zero();
-    Polynomial *o = ply_monomial(0);
-
-    Polynomial *sum = ply_sum(o,z);
-    ply_print_poly(sum);
-
-*/
-    Polynomial f = ply_create(2);
-    f.coefs[0] =6.0;
-    f.coefs[1] =7.0;
-    f.coefs[2] =1.0;
-
-
-    Polynomial g = ply_create(2);
-    g.coefs[0] = -6.0;
-    g.coefs[1] = -5.0;
-    g.coefs[2] = 1.0;
-
     Polynomial h = ply_create(1);
-    h.coefs[0] = -1.0;
-    h.coefs[1] = -1.0;
+    h.coefs[0] = 1.0;
+    h.coefs[1] = 1.0;
 
     Polynomial k = ply_create(1);
     k.coefs[0] = 2.0;
     k.coefs[1] = 2.0;
+
+    printf("f is \n" );
+    ply_print(f);
+    printf("g is \n" );
+    ply_print(g);
+    printf("h is \n" );
+    ply_print(h);
+    printf("k is \n" );
+    ply_print(k);
+
+    printf("f+g is \n" );
+    Polynomial sum = ply_sum(f,g);
+    ply_print(sum);
+
+    printf("the sum is\n" );
+
+    ply_print(ply_sum(h,k));
+    printf("the prod is\n" );
+    ply_print(ply_product(h,k));
 
 
     PolyMatrix A = pymat_create(1,2);
@@ -45,47 +63,41 @@ int main() {
     pymat_set_element(B, 0, 0, h);
     pymat_set_element(B, 0, 1, k);
 
-    PolyMatrix sum = pymat_sum(A,B);
+//    PolyMatrix sum = pymat_sum(A,B);
 
     int i;
     for (i=0; i<2; i++) {
-        ply_print(pymat_get_element(sum,0,i));
+        ply_print(pymat_get_element(sum,0,i);
     }
 
-    for (i=0; i< 2; i++) {
-        ply_delete(sum.data[i]);
-    }
+    */
 
-    pymat_delete(sum);
 
-    ply_delete(f);
-    ply_delete(g);
-    ply_delete(h);
-    ply_delete(k);
+
+
+
 
     //PROBLEM see ply_gcd
-    //Polynomial *res = ply_gcd(f,g); //PROBLEM
+    printf("line 68\n" );
+    PolyMatrix res = ply_gcd(f,g); //PROBLEM
+    printf("line 69\n" );
+    printf("gcd is \n");
+    ply_print(pymat_get_element(res, 0, 0));
 
-    //printf("gcd is \n");
-    //ply_print(res[0]);
 
-    //printf("res[1].deg is %d", res[1].deg);
+    Polynomial res01 = pymat_get_element(res,0,1);
+    Polynomial res02 = pymat_get_element(res,0,2);
+    printf("res[0][1].deg is %d\n", res01.deg);
 
 
-    //printf("Bezout coefs are \n");
-    //ply_print(res[1]);
 
-    //printf("\n and \n" );
-    //ply_print(res[2]);
-/*
-    ply_delete(f);
-    ply_delete(g);
+    printf("Bezout coefs are \n");
+    ply_print(res01);
 
-    int i;
-    for (i=0; i<2; i++) {
-        ply_delete(res[i]);
-    }*/
+    printf("\n and \n" );
+    ply_print(res02);
 
+    
 
     return 0;
 }

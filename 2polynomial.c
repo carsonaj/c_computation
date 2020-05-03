@@ -5,8 +5,7 @@
 #include <assert.h>
 #include "array.h"
 #include "counting.h"
-#include "matrix.h"
-#include "1polynomial.h"
+#include "polynomial.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -115,6 +114,25 @@ void ply_print(Polynomial poly) {
 //mathematics
 
 // algebra
+
+int ply_equal(Polynomial p, Polynomial q) {
+    int m = p.deg;
+    int n = q.deg;
+
+    if (m != n)
+        return FALSE;
+    else {
+        int i;
+        for (i=0; i<=m; i++){
+            double co_p = ply_get_coef(p, i);
+            co_q = ply_get_coef(q, i);
+            if (co_p != co_q)
+                return FALSE;
+        }
+
+        return TRUE;
+    }
+}
 
 Polynomial ply_zero() {
     Polynomial z = ply_create(0);

@@ -5,8 +5,8 @@
 #include <assert.h>
 #include "array.h"
 #include "counting.h"
-#include "matrix.h"
 #include "polynomial.h"
+#include "matrix.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -17,8 +17,14 @@ static Polynomial max_deg(Polynomial p1, Polynomial p2) {
     int deg2 = p2.deg;
     if (deg1>deg2)
         return p1;
-    else
+    else if (deg2>deg1)
         return p2;
+    else {
+        if (ply_is_zero(p1))
+            return p2;
+        else
+            return p1;
+    }
 }
 
 static Polynomial min_deg(Polynomial p1, Polynomial p2) {
@@ -26,23 +32,23 @@ static Polynomial min_deg(Polynomial p1, Polynomial p2) {
     int deg2 = p2.deg;
     if (deg1>deg2)
         return p2;
-    else
+    else if (deg2>deg1)
         return p1;
+    else {
+        if (ply_is_zero(p1))
+            return p1;
+        else
+            return p2;
+    }
 }
 
 // data structure
 Polynomial ply_create(int deg) {
-    assert(deg >= 0);
+    assert(deg >= 0 && deg <= MAX_DEG);
     Polynomial poly;
     poly.deg = deg;
-    double *coefs = malloc((deg+1)*sizeof(double));
-    poly.coefs = coefs;
 
     return poly;
-}
-
-void ply_delete(Polynomial poly) {
-    free(poly.coefs);
 }
 
 int ply_get_deg(Polynomial poly) {
@@ -51,11 +57,11 @@ int ply_get_deg(Polynomial poly) {
 }
 
 double ply_get_coef(Polynomial poly, int i) {
-    return poly.coefs[i]; //PROBLEM
+    return poly.coefs[i];
 }
 
-void ply_set_coef(Polynomial poly, int i, double val) {
-    poly.coefs[i] = val;
+void ply_set_coef(Polynomial *poly, int i, double val) {
+    poly->coefs[i] = val;
 }
 
 Polynomial ply_copy(Polynomial p) {
@@ -63,7 +69,7 @@ Polynomial ply_copy(Polynomial p) {
     int i;
     for (i=0; i<=copy.deg; i++) {
         double coef = ply_get_coef(p, i);
-        ply_set_coef(copy, i, coef);
+        ply_set_coef(&copy, i, coef);
     }
 
     return copy;
@@ -151,6 +157,7 @@ int ply_is_zero(Polynomial p) {
 }
 
 Polynomial ply_sum(Polynomial poly1, Polynomial poly2) {
+
     Polynomial p1 = max_deg(poly1, poly2);
     Polynomial p2 = min_deg(poly1, poly2);
     int deg1 = p1.deg;
@@ -176,7 +183,7 @@ Polynomial ply_sum(Polynomial poly1, Polynomial poly2) {
     Polynomial sum_poly = ply_create(deg);
     for (i=0; i<=deg; i++) {
         double coef = sum_coefs[i];
-        ply_set_coef(sum_poly, i, coef);
+        ply_set_coef(&sum_poly, i, coef);
     }
 
     return sum_poly;
@@ -204,7 +211,7 @@ Polynomial ply_product(Polynomial poly1, Polynomial poly2) {
                     if ((l<=deg1)&&(k-l<=deg2))
                         sum_k = sum_k+(ply_get_coef(p1, l)*ply_get_coef(p2, k-l));
                 }
-            ply_set_coef(prod_poly, k, sum_k);
+            ply_set_coef(&prod_poly, k, sum_k);
         }
 
         return prod_poly;
@@ -216,14 +223,14 @@ Polynomial ply_scale(double s, Polynomial p) {
         Polynomial z = ply_zero();
         return z;
     }
-    else if (s!=0) {
+    else {
         int n = p.deg;
         Polynomial sp = ply_create(n);
 
         int i;
         for(i=0; i<=n; i++) {
             double coef = ply_get_coef(p, i);
-            ply_set_coef(sp, i, s*coef);
+            ply_set_coef(&sp, i, s*coef);
         }
 
         return sp;
@@ -241,7 +248,7 @@ Polynomial ply_scale(double s, Polynomial p) {
 
 
 //---------------------------------------------------------------
-static Polynomial *sub_division(Polynomial f, Polynomial g) {
+static PolyMatrix sub_division(Polynomial f, Polynomial g) {
     Polynomial q;
     Polynomial r;
 
@@ -249,18 +256,15 @@ static Polynomial *sub_division(Polynomial f, Polynomial g) {
     q = ply_monomial(deg_q);
 
     double coef = ply_get_coef(f, f.deg)/ply_get_coef(g, g.deg);
-    ply_set_coef(q, deg_q, coef);
+    ply_set_coef(&q, deg_q, coef);
 
     Polynomial prod = ply_product(g, q);
     Polynomial scaled = ply_scale(-1.0, prod);
     r = ply_sum(f, scaled);
 
-    ply_delete(prod);
-    ply_delete(scaled);
-
-    Polynomial *pair = malloc(2*sizeof(Polynomial));
-    pair[0] = q;
-    pair[1] = r;
+    PolyMatrix pair = pymat_create(1, 2);
+    pymat_set_element(&pair, 0, 0, q);
+    pymat_set_element(&pair, 0, 1, r);
 
     return pair;
 }
@@ -269,196 +273,123 @@ static Polynomial *sub_division(Polynomial f, Polynomial g) {
 // returns struct containing quotient, remainder
 
 // remember to free pair and the polys it contains after use
-Polynomial *ply_division(Polynomial f, Polynomial g) {
+PolyMatrix ply_division(Polynomial f, Polynomial g) {
+    printf("line 277 \n" );
     assert(ply_is_zero(g)==FALSE);
     Polynomial q0 = ply_zero();
     Polynomial r0 = ply_copy(f);
 
     Polynomial q = q0;
     Polynomial r = r0;
-    Polynomial *pair;
+    PolyMatrix pair;
+
+    printf("line 285\n" );
 
     if (f.deg < g.deg || ply_is_zero(f)==TRUE) {
-        pair = malloc(2*sizeof(Polynomial));
-        pair[0] = q;
-        pair[1] = r;
+        pair = pymat_create(1,2);
+        pymat_set_element(&pair, 0, 0, q);
+        pymat_set_element(&pair, 0, 1, r);
 
         return pair;
     }
     else {
-        int change = FALSE;
         while (r.deg >= g.deg && ply_is_zero(r)==FALSE) {
-            change = TRUE;
             pair = sub_division(r, g);
-            ply_delete(r);
-            Polynomial temp_q = pair[0];
-            Polynomial temp_r = pair[1];
+            Polynomial temp_q = pymat_get_element(pair, 0, 0);
+            Polynomial temp_r = pymat_get_element(pair, 0, 1);
 
             q = ply_sum(q, temp_q);
             r = ply_copy(temp_r);
 
-            ply_delete(temp_q);
-            ply_delete(temp_r);
-            free(pair);
-
         }
 
-        if (change == TRUE)
-            ply_delete(q0);
-
-        pair[0] = q;
-        pair[1] = r;
+        pair = pymat_create(1,2);
+        pymat_set_element(&pair, 0, 0, q);
+        pymat_set_element(&pair, 0, 1, r);
 
         return pair;
     }
 }
 
 // return gcd and Bezout coefficients for f,g
-Polynomial *ply_gcd(Polynomial f, Polynomial g) {
+PolyMatrix ply_gcd(Polynomial f, Polynomial g) {
     assert((ply_is_zero(f)==TRUE && ply_is_zero(f)==TRUE)==FALSE);
-    Polynomial *result = malloc(3*(sizeof(Polynomial)));
+    PolyMatrix result = pymat_create(1, 3);
 
     if (ply_is_zero(f)==TRUE) {
-        result[0] = g;
-        result[1] = ply_zero();
-        result[2] = ply_monomial(0);
+        pymat_set_element(&result, 0, 0, g);
+        pymat_set_element(&result, 0, 1, ply_zero());
+        pymat_set_element(&result, 0, 2, ply_monomial(0));
 
         return result;
     }
 
     else if (ply_is_zero(g)==TRUE) {
-        result[0] = f;
-        result[1] = ply_monomial(0);
-        result[2] = ply_zero();
+        pymat_set_element(&result, 0, 0, f);
+        pymat_set_element(&result, 0, 1, ply_monomial(0));
+        pymat_set_element(&result, 0, 2, ply_zero());
 
         return result;
     }
 
     else {
+        printf("line 333\n" );
         Polynomial p1 = max_deg(f, g);
         Polynomial p2 = min_deg(f, g);
 
-        Polynomial *a = malloc(2*sizeof(Polynomial));
-        Polynomial *b = malloc(2*sizeof(Polynomial));
-        Polynomial *c = malloc(2*sizeof(Polynomial));
+        PolyMatrix a = pymat_create(1, 2);
+        PolyMatrix b = pymat_create(1, 2);
+        PolyMatrix c;
 
         Polynomial a00 = ply_monomial(0);
         Polynomial a01 = ply_zero();
         Polynomial b00 = ply_zero();
         Polynomial b01 = ply_monomial(0);
 
-        a[0] = a00;
-        a[1] = a01;
-        b[0] = b00;
-        b[1] = b01;
+        pymat_set_element(&a, 0, 0, a00);
+        pymat_set_element(&a, 0, 1, a01);
+        pymat_set_element(&b, 0, 0, b00);
+        pymat_set_element(&b, 0, 1, b01);
 
-        Polynomial q0;
-        Polynomial r0;
+        while(1) {
+            printf("line 353\n" );
+            PolyMatrix qr = ply_division(p1, p2); \\problem
+            printf("line 354\n" );
+            Polynomial q = pymat_get_element(qr, 0, 0);
+            Polynomial r = pymat_get_element(qr, 0, 1);
 
-        Polynomial *qr0 = ply_division(p1, p2);
+            if (ply_is_zero(r))
+                break;
 
-        q0 = qr0[0];
-        r0 = qr0[1];
+            PolyMatrix scaled = pymat_poly_scale(q, b);
+            PolyMatrix neg_qb = pymat_scale(-1.0, scaled);
+            c = pymat_sum(a, neg_qb);
 
-        Polynomial q = q0;
-        Polynomial r = r0;
-
-        Polynomial prod = ply_product(q, b[0]);
-        Polynomial scaled = ply_scale(-1.0, prod);
-
-        c[0] = ply_sum(a[0], scaled);
-        ply_delete(prod);
-        ply_delete(scaled);
-
-        prod = ply_product(q, b[1]);
-        scaled = ply_scale(-1.0, prod);
-        c[1] = ply_sum(a[1], scaled);
-
-        ply_delete(prod);
-        ply_delete(scaled);
-
-        p1 = p2;
-        p2 = r;
-
-        Polynomial *qr;
-        int count = 1;
-        while (ply_is_zero(r) != TRUE) {
-            qr = ply_division(p1, p2);
-            q = qr[0];
-            r = qr[1];
-
-            ply_delete(a[0]);
-            ply_delete(a[1]);
-            free(a);
+            p1 = ply_copy(p2);
+            p2 = ply_copy(r);
 
             a = b;
             b = c;
 
-            prod = ply_product(q, b[0]);
-            scaled = ply_scale(-1.0, prod);
-            c[0] = ply_sum(a[0], scaled);
-
-            ply_delete(prod);
-            ply_delete(scaled);
-
-            prod = ply_product(q, b[1]);
-            scaled = ply_scale(-1.0, prod);
-            c[1] = ply_sum(a[1], scaled);
-
-            ply_delete(prod);
-            ply_delete(scaled);
-
-            if (count == 2)
-                ply_delete(p1);
-
-            p1 = p2;
-            p2 = r;
-
-            if (count < 2)
-                count += 1;
-
-            free(qr);
-            ply_delete(q);
         }
-
-        ply_print(c[0]);//---------------------------------!!!!!!!!!!
-
-        double coef = ply_get_coef(p1, p1.deg);
+        printf("line 373\n" );
+        double coef = ply_get_coef(p2, p2.deg);
         if (coef != 1.0) {
-            Polynomial t_p1 = p1;
-            Polynomial t_c0 = c[0];
-            Polynomial t_c1 = c[1];
+            Polynomial t_p2 = p2;
+            PolyMatrix t_c = c;
 
-            p1 = ply_scale(1.0/coef, p1);
-            c[0] = ply_scale(1.0/coef, c[0]);
-            c[1] = ply_scale(1.0/coef, c[1]);
+            p2 = ply_scale(1.0/coef, t_p2);
+            c = pymat_scale(1.0/coef, t_c);
 
-            ply_delete(t_p1);
-            ply_delete(t_c0);
-            ply_delete(t_c1);
         }
 
-        ply_delete(a00);
-        ply_delete(a01);
-        ply_delete(b00);
-        ply_delete(b01);
-
-        ply_delete(b[0]);
-        ply_delete(b[1]);
-        free(b);
-
-        ply_delete(q0);
-        ply_delete(r0);
-
-        free(qr0);
-        ply_delete(r);
-
-        result[0] = p1;
-        result[1] = c[0];
-        result[2] = c[1];
+        Polynomial c00 = pymat_get_element(c, 0, 0);
+        Polynomial c01 = pymat_get_element(c, 0, 1);
+        pymat_set_element(&result, 0, 0 ,p2);
+        pymat_set_element(&result, 0, 1, c00);
+        pymat_set_element(&result, 0, 1, c01);
 
         return result;
-
     }
 }
 
@@ -500,7 +431,7 @@ Polynomial ply_differentiate(Polynomial poly, int n) {
     int deg = poly.deg;
     if (deg<n) {
         Polynomial deriv = ply_create(0);
-        ply_set_coef(deriv, 0, 0.0);
+        ply_set_coef(&deriv, 0, 0.0);
         return deriv;
     }
     else {
@@ -522,7 +453,7 @@ Polynomial ply_differentiate(Polynomial poly, int n) {
         Polynomial deriv = ply_create(dn_deg);
         for (i=0; i<=dn_deg; i++) {
             double coef = dn_coefs[i];
-            ply_set_coef(deriv, i, coef);
+            ply_set_coef(&deriv, i, coef);
         }
 
         return deriv;
@@ -536,9 +467,9 @@ Polynomial ply_monomial(int n) {
     Polynomial p = ply_create(n);
     int i;
     for (i=0; i<=n-1; i++) {
-        ply_set_coef(p, i, 0.0);
+        ply_set_coef(&p, i, 0.0);
     }
-    ply_set_coef(p, n, 1.0);
+    ply_set_coef(&p, n, 1.0);
     return p;
 }
 
@@ -557,21 +488,12 @@ Polynomial ply_legendre(int n) {
         Polynomial prod = ply_product(p1, poly_list[i]);
         Polynomial left = ply_scale(2*i+1, prod);
 
-        ply_delete(prod);
 
         Polynomial right = ply_scale(-i, poly_list[i-1]);
         Polynomial sum = ply_sum(right, left);
         Polynomial p = ply_scale(1.0/(i+1), sum);
 
-        ply_delete(left);
-        ply_delete(right);
-        ply_delete(sum);
-
         poly_list[i+1] = p;
-    }
-
-    for(i=0; i<=n-1; i++) {
-        ply_delete(poly_list[i]);
     }
 
     return poly_list[n];

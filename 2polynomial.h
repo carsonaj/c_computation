@@ -1,4 +1,8 @@
+#include "matrix.h"
+
 // polynomial
+#ifndef POLYNOMIAL_H
+#define POLYNOMIAL_H
 
 typedef struct Polynomial Polynomial;
 
@@ -19,6 +23,7 @@ void ply_print(Polynomial poly);
 // mathematics
 
 // algebra
+int ply_equal(Polynomial p, Polynomial q);
 Polynomial ply_zero();
 int ply_is_zero(Polynomial p);
 Polynomial ply_sum(Polynomial poly1, Polynomial poly2);
@@ -35,3 +40,5 @@ Polynomial ply_differentiate(Polynomial poly, int n);
 // families of polynomials
 Polynomial ply_monomial(int n);
 Polynomial ply_legendre(int n);
+
+#endif
