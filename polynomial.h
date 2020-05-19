@@ -3,7 +3,7 @@
 // polynomial
 #ifndef POLYNOMIAL_H
 #define POLYNOMIAL_H
-#define MAX_DEG 200
+#define MAX_DEG 100
 
 typedef struct Polynomial Polynomial;
 
@@ -14,6 +14,7 @@ struct Polynomial {
 
 // structure
 Polynomial ply_create(int deg);
+Polynomial ply_create_array(int deg, double *coefs);
 int ply_get_deg(Polynomial poly);
 double ply_get_coef(Polynomial poly, int i);
 void ply_set_coef(Polynomial *poly, int i, double val);
@@ -29,9 +30,13 @@ int ply_is_zero(Polynomial p);
 Polynomial ply_sum(Polynomial poly1, Polynomial poly2);
 Polynomial ply_product(Polynomial poly1, Polynomial poly2);
 Polynomial ply_scale(double s, Polynomial p);
+Polynomial ply_neg(Polynomial p);
 PolyMatrix ply_division(Polynomial f, Polynomial g);
 PolyMatrix ply_gcd(Polynomial p, Polynomial q);
-Polynomial ply_modulo(Polynomial p, Polynomial modulus);
+Polynomial pymod_reduce(Polynomial p, Polynomial m);
+Polynomial pymod_inv(Polynomial p, Polynomial m);
+Polynomial pymod_sum(Polynomial p, Polynomial q, Polynomial m);
+Polynomial pymod_product(Polynomial p, Polynomial q, Polynomial m);
 
 // analysis
 double ply_evaluate(Polynomial poly, double x);

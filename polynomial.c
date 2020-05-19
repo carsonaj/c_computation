@@ -51,6 +51,18 @@ Polynomial ply_create(int deg) {
     return poly;
 }
 
+Polynomial ply_create_array(int deg, double *coefs) {
+    assert(deg >= 0 && deg <= MAX_DEG);
+    Polynomial poly = ply_create(deg);
+    int i;
+    for (i=0; i<=deg; i++) {
+        double coef = coefs[i];
+        ply_set_coef(&poly, i, coef);
+    }
+
+    return poly;
+}
+
 int ply_get_deg(Polynomial poly) {
     int deg = poly.deg;
     return deg;
@@ -237,7 +249,10 @@ Polynomial ply_scale(double s, Polynomial p) {
     }
 }
 
-
+Polynomial ply_neg(Polynomial p) {
+    Polynomial neg = ply_scale(-1.0, p);
+    return neg;
+}
 
 
 
@@ -274,7 +289,6 @@ static PolyMatrix sub_division(Polynomial f, Polynomial g) {
 
 // remember to free pair and the polys it contains after use
 PolyMatrix ply_division(Polynomial f, Polynomial g) {
-    printf("line 277 \n" );
     assert(ply_is_zero(g)==FALSE);
     Polynomial q0 = ply_zero();
     Polynomial r0 = ply_copy(f);
@@ -282,8 +296,6 @@ PolyMatrix ply_division(Polynomial f, Polynomial g) {
     Polynomial q = q0;
     Polynomial r = r0;
     PolyMatrix pair;
-
-    printf("line 285\n" );
 
     if (f.deg < g.deg || ply_is_zero(f)==TRUE) {
         pair = pymat_create(1,2);
@@ -333,28 +345,32 @@ PolyMatrix ply_gcd(Polynomial f, Polynomial g) {
     }
 
     else {
-        printf("line 333\n" );
-        Polynomial p1 = max_deg(f, g);
-        Polynomial p2 = min_deg(f, g);
+        int flip = FALSE;
+        Polynomial p1;
+        Polynomial p2;
+        if (f.deg > g.deg) {
+            p1 = f;
+            p2 = g;
+        }
+        else {
+            p1 = g;
+            p2 = f;
+            flip = TRUE;
+        }
 
         PolyMatrix a = pymat_create(1, 2);
         PolyMatrix b = pymat_create(1, 2);
-        PolyMatrix c;
+        PolyMatrix c = pymat_create(1, 2);
 
-        Polynomial a00 = ply_monomial(0);
-        Polynomial a01 = ply_zero();
-        Polynomial b00 = ply_zero();
-        Polynomial b01 = ply_monomial(0);
-
-        pymat_set_element(&a, 0, 0, a00);
-        pymat_set_element(&a, 0, 1, a01);
-        pymat_set_element(&b, 0, 0, b00);
-        pymat_set_element(&b, 0, 1, b01);
+        pymat_set_element(&a, 0, 0, ply_monomial(0));
+        pymat_set_element(&a, 0, 1, ply_zero());
+        pymat_set_element(&b, 0, 0, ply_zero());
+        pymat_set_element(&b, 0, 1, ply_monomial(0));
+        pymat_set_element(&c, 0, 0, ply_zero());
+        pymat_set_element(&c, 0, 1, ply_monomial(0));
 
         while(1) {
-            printf("line 353\n" );
-            PolyMatrix qr = ply_division(p1, p2); \\problem
-            printf("line 354\n" );
+            PolyMatrix qr = ply_division(p1, p2);
             Polynomial q = pymat_get_element(qr, 0, 0);
             Polynomial r = pymat_get_element(qr, 0, 1);
 
@@ -372,7 +388,6 @@ PolyMatrix ply_gcd(Polynomial f, Polynomial g) {
             b = c;
 
         }
-        printf("line 373\n" );
         double coef = ply_get_coef(p2, p2.deg);
         if (coef != 1.0) {
             Polynomial t_p2 = p2;
@@ -385,21 +400,55 @@ PolyMatrix ply_gcd(Polynomial f, Polynomial g) {
 
         Polynomial c00 = pymat_get_element(c, 0, 0);
         Polynomial c01 = pymat_get_element(c, 0, 1);
+
         pymat_set_element(&result, 0, 0 ,p2);
-        pymat_set_element(&result, 0, 1, c00);
-        pymat_set_element(&result, 0, 1, c01);
+        if (flip == TRUE) {
+            pymat_set_element(&result, 0, 1, c01);
+            pymat_set_element(&result, 0, 2, c00);
+        }
+        else {
+            pymat_set_element(&result, 0, 1, c00);
+            pymat_set_element(&result, 0, 2, c01);
+        }
+
 
         return result;
     }
 }
 
-//---------------------------------------------------------------------
-/*
-
-Polynomial *ply_modulo(Polynomial *p, Polynomial *modulus) {
-
+//polynomial arithmetic modulo m(x)
+//--------------------------------------------------
+Polynomial pymod_reduce(Polynomial p, Polynomial m) {
+    assert(ply_is_zero(m)==FALSE);
+    PolyMatrix pair = ply_division(p, m);
+    Polynomial pmodm = pymat_get_element(pair, 0, 1);
+    return pmodm;
 }
-*/
+
+Polynomial pymod_inv(Polynomial p, Polynomial m) {
+    PolyMatrix res = ply_gcd(p,m);
+    Polynomial pinv_modm = pymat_get_element(res, 0, 1);
+    if (pinv_modm.deg >= m.deg) {
+        pinv_modm = pymod_reduce(p, m);
+    }
+
+    return pinv_modm;
+}
+
+Polynomial pymod_sum(Polynomial p, Polynomial q, Polynomial m) {
+    Polynomial sum = ply_sum(p, q);
+    sum = pymod_reduce(sum, m);
+
+    return sum;
+}
+
+Polynomial pymod_product(Polynomial p, Polynomial q, Polynomial m) {
+    Polynomial prod = ply_product(p, q);
+    prod = pymod_reduce(prod, m);
+
+    return prod;
+}
+
 
 
 

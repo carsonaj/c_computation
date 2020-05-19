@@ -1,6 +1,6 @@
 #ifndef MATRIX_H
 #define MATRIX_H
-#define MAX_SIZE 500
+#define MAX_SIZE 50
 
 typedef struct Matrix Matrix;
 typedef struct PolyMatrix PolyMatrix;

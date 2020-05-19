@@ -6,7 +6,7 @@
 #include "matrix.h"
 
 #define TRUE 1
-#define FALSE 0
+#define FALSE 0 
 
 
 // zero indexed matrix library
@@ -55,7 +55,7 @@ Matrix mat_get_rows(Matrix mat, int rows, int *rows_arr) {
     }
 
     return row_mat;
-} 
+}
 
 Matrix mat_get_cols(Matrix mat, int cols, int *cols_arr) {
     int rows = mat.rows;

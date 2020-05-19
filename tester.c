@@ -4,38 +4,50 @@
 #include <math.h>
 #include <assert.h>
 #include "array.h"
-#include "matrix.h"
 #include "polynomial.h"
+#include "number_field.h"
 
 
 int main() {
 
 
-    Polynomial f = ply_create(3);
-    f.coefs[0] =-8.0;
-    f.coefs[1] =0.0;
-    f.coefs[2] =0.0;
-    f.coefs[3] =1.0;
+    Polynomial m = ply_create(2);
+    m.coefs[0] =-2.0;
+    m.coefs[1] =0.0;
+    m.coefs[2] =1.0;
 
     //Polynomial f = ply_zero();
 
-    Polynomial g = ply_create(1);
-    g.coefs[0] = -2.0;
-    g.coefs[1] = 1.0;
+    Polynomial p = ply_create(1);
+    p.coefs[0] = 1.0;
+    p.coefs[1] = 2.0;
+
+    NFNumber x;
+    x.min_poly = m;
+    x.number = p;
+
+    printf("x is \n" );
+    nf_print(x);
+    printf("x inverse is \n" );
+    nf_print(nf_inv(x));
 
     //PolyMatrix pair = ply_division(f,g);
     //ply_print(pymat_get_element(pair,0,0));
     //ply_print(pymat_get_element(pair,0,1));
-/*
-    Polynomial h = ply_create(1);
+
+    /*Polynomial h = ply_create(3);
     h.coefs[0] = 1.0;
     h.coefs[1] = 1.0;
+    h.coefs[2] = 1.0;
+    h.coefs[3] = 1.0;
 
-    Polynomial k = ply_create(1);
-    k.coefs[0] = 2.0;
-    k.coefs[1] = 2.0;
+    Polynomial k = ply_create(3);
+    k.coefs[0] = 1.0;
+    k.coefs[1] = 0.0;
+    k.coefs[2] = 0.0;
+    k.coefs[3] = 1.0;*/
 
-    printf("f is \n" );
+    /*printf("f is \n" );
     ply_print(f);
     printf("g is \n" );
     ply_print(g);
@@ -77,18 +89,14 @@ int main() {
 
 
 
-    //PROBLEM see ply_gcd
-    printf("line 68\n" );
-    PolyMatrix res = ply_gcd(f,g); //PROBLEM
-    printf("line 69\n" );
+    /*//PROBLEM see ply_gcd
+    PolyMatrix res = ply_gcd(p,m); //PROBLEM
     printf("gcd is \n");
     ply_print(pymat_get_element(res, 0, 0));
 
 
     Polynomial res01 = pymat_get_element(res,0,1);
     Polynomial res02 = pymat_get_element(res,0,2);
-    printf("res[0][1].deg is %d\n", res01.deg);
-
 
 
     printf("Bezout coefs are \n");
@@ -97,7 +105,13 @@ int main() {
     printf("\n and \n" );
     ply_print(res02);
 
-    
+    printf("pmodm is  is \n" );
+    ply_print(pymod_reduce(p,m));
+
+    printf("inverse is \n" );
+    ply_print(pymod_inv(p,m));*/
+
+
 
     return 0;
 }
