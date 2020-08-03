@@ -51,7 +51,7 @@ Polynomial ply_create(int deg) {
     return poly;
 }
 
-Polynomial ply_create_array(int deg, double *coefs) {
+Polynomial ply_create_coef(int deg, double *coefs) {
     assert(deg >= 0 && deg <= MAX_DEG);
     Polynomial poly = ply_create(deg);
     int i;

@@ -14,7 +14,7 @@ struct Polynomial {
 
 // structure
 Polynomial ply_create(int deg);
-Polynomial ply_create_array(int deg, double *coefs);
+Polynomial ply_create_coef(int deg, double *coefs);
 int ply_get_deg(Polynomial poly);
 double ply_get_coef(Polynomial poly, int i);
 void ply_set_coef(Polynomial *poly, int i, double val);

@@ -11,8 +11,8 @@
 
 // structure
 
-NFNumber nf_create(Polynomial min_poly, Polynomial number) {
-    NFNumber x;
+AlgebraicNumber nf_create(Polynomial min_poly, Polynomial number) {
+    AlgebraicNumber x;
     x.min_poly = min_poly;
     if (number.deg > min_poly.deg) {
         x.number = pymod_reduce(number, min_poly);
@@ -25,7 +25,7 @@ NFNumber nf_create(Polynomial min_poly, Polynomial number) {
     return x;
 }
 
-void nf_print(NFNumber x) {
+void nf_print(AlgebraicNumber x) {
     Polynomial poly = x.number;
     int deg = poly.deg;
     double coef0 = ply_get_coef(poly, 0);
@@ -71,34 +71,34 @@ void nf_print(NFNumber x) {
 
 // algebra
 
-NFNumber nf_sum(NFNumber x, NFNumber y) {
+AlgebraicNumber nf_sum(AlgebraicNumber x, AlgebraicNumber y) {
     Polynomial z_num = pymod_sum(x.number, y.number, x.min_poly);
-    NFNumber z = nf_create(x.min_poly, z_num);
+    AlgebraicNumber z = nf_create(x.min_poly, z_num);
 
     return z;
 }
 
-NFNumber nf_neg(NFNumber x) {
+AlgebraicNumber nf_neg(AlgebraicNumber x) {
     Polynomial min_poly = x.min_poly;
     Polynomial neg_num = ply_neg(x.number);
 
-    NFNumber neg_x = nf_create(min_poly, neg_num);
+    AlgebraicNumber neg_x = nf_create(min_poly, neg_num);
 
     return neg_x;
 }
 
-NFNumber nf_product(NFNumber x, NFNumber y) {
+AlgebraicNumber nf_product(AlgebraicNumber x, AlgebraicNumber y) {
     Polynomial z_num = pymod_product(x.number, y.number, x.min_poly);
-    NFNumber z = nf_create(x.min_poly, z_num);
+    AlgebraicNumber z = nf_create(x.min_poly, z_num);
 
     return z;
 }
 
-NFNumber nf_inv(NFNumber x) {
+AlgebraicNumber nf_inv(AlgebraicNumber x) {
     assert(ply_is_zero(x.number)==FALSE);
     Polynomial inv_num = pymod_inv(x.number, x.min_poly);
 
-    NFNumber inv = nf_create(x.min_poly, inv_num);
+    AlgebraicNumber inv = nf_create(x.min_poly, inv_num);
 
     return inv;
 }

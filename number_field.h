@@ -4,22 +4,22 @@
 #include "matrix.h"
 
 // number field
-typedef struct NFNumber NFNumber;
+typedef struct AlgebraicNumber AlgebraicNumber;
 
-struct NFNumber {
+struct AlgebraicNumber {
     Polynomial min_poly;
     Polynomial number;
 };
 
 // structure
-NFNumber nf_create(Polynomial min_poly, Polynomial number);
-void nf_print(NFNumber x);
+AlgebraicNumber nf_create(Polynomial min_poly, Polynomial number);
+void nf_print(AlgebraicNumber x);
 
 // algebra
-NFNumber nf_sum(NFNumber x, NFNumber y);
-NFNumber nf_neg(NFNumber x);
-NFNumber nf_product(NFNumber x, NFNumber y);
-NFNumber nf_inv(NFNumber x);
+AlgebraicNumber nf_sum(AlgebraicNumber x, AlgebraicNumber y);
+AlgebraicNumber nf_neg(AlgebraicNumber x);
+AlgebraicNumber nf_product(AlgebraicNumber x, AlgebraicNumber y);
+AlgebraicNumber nf_inv(AlgebraicNumber x);
 
 
 
